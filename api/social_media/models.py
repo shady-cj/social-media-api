@@ -13,7 +13,7 @@ class Profile(models.Model):
     last_name = models.CharField(max_length=64, null=True, blank=True)
     profile_photo = models.URLField(null=True, blank=True)
     bio = models.TextField(null=True, blank=True)
-    preferences = models.JSONField(default=dict)
+    preferences = models.JSONField(default=dict, null=True, blank=True)
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
 
     def __str__(self):
