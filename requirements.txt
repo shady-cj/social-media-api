@@ -1,0 +1,13 @@
+Django==5.2.8
+djangorestframework
+djangorestframework-simplejwt
+django-filter
+graphene-django
+django-redis
+gql[all]
+celery[redis]
+django-celery-beat
+django-cors-headers
+pillow
+python-decouple
+drf-spectacular[sidecar]
