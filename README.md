@@ -196,6 +196,8 @@ docker-compose up --build
 ## 📚 API Documentation
 
 ### Core Models
+<img width="2229" height="1098" alt="Social Media API ERD" src="https://github.com/user-attachments/assets/35bd2bcd-6e98-4f04-beae-e4df87e55d9d" />
+
 
 **User Model**
 - `id`: Unique identifier
