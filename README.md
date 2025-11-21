@@ -173,9 +173,22 @@ python manage.py migrate
 ```
 
 6. **Create a superuser**
-```bash
-python manage.py createsuperuser
-```
+
+  Running
+  ```bash
+  python manage.py createsuperuser
+  ```
+  won't work because both username and email are required fields as well the password
+
+  To create a superuser run on your terminal
+  ```bash
+  python manage.py shell
+  ```
+  Then in the python shell run
+  ```python
+  from django.contrib.auth import get_user_model
+  get_user_model().objects.create_superuser(<username>, <email>, <password>)
+  ```
 
 7. **Start the development server**
 ```bash
