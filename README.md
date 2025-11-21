@@ -173,9 +173,9 @@ python manage.py migrate
 ```
 
 6. **Create a superuser**
-```bash
-python manage.py createsuperuser
-```
+  ```bash
+  python manage.py createsuperuser
+  ```
 
 7. **Start the development server**
 ```bash
@@ -196,7 +196,8 @@ docker-compose up --build
 ## 📚 API Documentation
 
 ### Core Models
-<img width="2243" height="1681" alt="Social Media API ERD" src="https://github.com/user-attachments/assets/1c0918eb-d2e8-4fa1-ae1f-44cd1c12fe73" />
+<img width="2309" height="1627" alt="Social Media API ERD" src="https://github.com/user-attachments/assets/17670f26-2dce-4c52-baa1-6768464097db" />
+
 
 
 
