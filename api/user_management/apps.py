@@ -5,5 +5,6 @@ class UserManagementConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'user_management'
     def ready(self):
-        from . import signals
+        import user_management.signals
+        import graphql_auth.signals
         super().ready()

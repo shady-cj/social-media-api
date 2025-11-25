@@ -46,7 +46,9 @@ class PostMedia(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="attachments")
     media_url = models.URLField()
     type = models.CharField(max_length=10, choices=media_types, default="PHOTO")
+    metadata = models.JSONField(default=dict, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    mime_type = models.CharField(max_length=20, blank=True, null=True)
     constraints = [
         models.CheckConstraint(check=Q(type__in=['PHOTO','VIDEO','GIF']), name='valid_interaction_type'),
     ]

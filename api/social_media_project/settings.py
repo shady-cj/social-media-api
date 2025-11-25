@@ -40,19 +40,56 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django', 
-    'rest_framework',
-    'rest_framework_simplejwt',
-    'rest_framework_simplejwt.token_blacklist',
+    # 'rest_framework',
+    # 'rest_framework_simplejwt',
+    # 'rest_framework_simplejwt.token_blacklist', no need to re-invent the wheel
     'corsheaders',
+    'django_filters',
     'drf_spectacular',
     'drf_spectacular_sidecar', # required for Django collectstatic discovery
     'user_management',
-    'social_media'
+    'social_media', 
+
+    'graphene_django', 
+    'graphql_jwt.refresh_token.apps.RefreshTokenConfig',
+    'graphql_auth'
 ]
 
 
+# ======================================================================================================================
+# Django Graphql settings
 
+GRAPHENE = {
+    "SCHEMA": "social_media_project.schema.schema",
+    'MIDDLEWARE': [
+        'graphql_jwt.middleware.JSONWebTokenMiddleware',
+    ],
+}
+GRAPHQL_JWT = {
+    "JWT_VERIFY_EXPIRATION": True,
 
+    "JWT_LONG_RUNNING_REFRESH_TOKEN": True,
+    "JWT_ALLOW_ANY_CLASSES": [
+        "graphql_auth.mutations.Register",
+        "graphql_auth.mutations.VerifyAccount",
+        "graphql_auth.mutations.ObtainJSONWebToken",
+        "graphql_auth.mutations.ResendActivationEmail",
+        "graphql_auth.mutations.SendPasswordResetEmail",
+        "graphql_auth.mutations.PasswordReset",
+        "graphql_auth.mutations.VerifyToken",
+        "graphql_auth.mutations.RefreshToken",
+        "graphql_auth.mutations.RevokeToken",
+    ],
+}
+GRAPHQL_AUTH = {
+    'EMAIL_VERIFICATION': True, # Enforce that users verify their account before login.
+    "REGISTER_MUTATION_FIELDS": ["username", "email"],
+    "UPDATE_MUTATION_FIELDS": ["username"]
+}
+
+AUTHENTICATON_BACKENDS = [
+    "graphql_auth.backends.GraphQLAuthBackend"
+]
 
 CORS_ALLOW_ALL_ORIGINS = True
 # CORS_ALLOWED_ORIGINS = [
@@ -142,13 +179,13 @@ SPECTACULAR_SETTINGS = {
 
 # ======================================================================================================================
 # Django Rest Framework Configurations
-REST_FRAMEWORK = {
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
-    ),
-}
+# REST_FRAMEWORK = {
+#     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+#     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+#     "DEFAULT_AUTHENTICATION_CLASSES": (
+#         "rest_framework_simplejwt.authentication.JWTAuthentication",
+#     ),
+# }
 
 
 SIMPLE_JWT = {
@@ -175,6 +212,10 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
+
+# Email configs
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 
 # Static files (CSS, JavaScript, Images)

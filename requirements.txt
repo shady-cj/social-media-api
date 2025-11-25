@@ -1,6 +1,8 @@
 Django==5.2.8
 djangorestframework
 djangorestframework-simplejwt
+django-graphql-jwt==0.4.0
+django-graphql-auth
 django-filter
 graphene-django
 django-redis
@@ -11,3 +13,4 @@ django-cors-headers
 pillow
 python-decouple
 drf-spectacular[sidecar]
+django-graphql-playground
