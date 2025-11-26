@@ -2,10 +2,13 @@ from graphene_django import DjangoObjectType, DjangoListField
 import graphene
 from graphene_django.filter import DjangoFilterConnectionField
 from .models import Profile, Post, PostMedia, Interaction, Follow
-import re
 from graphql import GraphQLError
 from django.utils import timezone
-# from .filters import CustomerFilter, ProductFilter, OrderFilter
+
+from django.contrib.auth import get_user_model
+
+
+User = get_user_model()
 
 
 
@@ -267,6 +270,61 @@ class DeleteInteraction(graphene.Mutation):
         
         interaction.delete()
         return DeleteInteraction(success=True)
+    
+class FollowUser(graphene.Mutation):
+    success = graphene.Boolean()
+    class Arguments:
+        username_to_follow = graphene.String(required=True)
+    
+    def mutate(self, info, username_to_follow):
+        user = info.context.user
+        if user.is_anonymous or not user.is_authenticated:
+            raise GraphQLError("Authentication required to follow a user.")
+        try:
+            user_to_follow = User.objects.get(username=username_to_follow)
+        except User.DoesNotExist:
+            raise GraphQLError("User to follow not found.")
+        
+        if user == user_to_follow:
+            # extra check to ensure user can't follow themself, there's a database level constraint to ensure this never happens too.
+            raise GraphQLError("You cannot follow yourself.")
+        
+        Follow.objects.get_or_create(user=user_to_follow, followed_by=user)
+        return FollowUser(success=True)
+
+class UnFollowUser(graphene.Mutation):
+
+    success = graphene.Boolean()
+
+    class Arguments:
+        username_to_unfollow = graphene.String(required=True)
+    
+    def mutate(self, info, username_to_unfollow):
+
+        user = info.context.user
+
+        if user.is_anonymous or not user.is_authenticated:
+            raise GraphQLError("Authentication required to follow a user.")
+        try:
+            user_to_unfollow = User.objects.get(username=username_to_unfollow)
+        except User.DoesNotExist:
+            raise GraphQLError("User to follow not found.")
+        
+        if user == user_to_unfollow:
+            # extra check to ensure user can't follow themself, there's a database level constraint to ensure this never happens too.
+            raise GraphQLError("You cannot unfollow yourself.")
+        
+        try:
+            follow = Follow.objects.get(user=user_to_unfollow, followed_by=user)
+
+        except Follow.DoesNotExist:
+            raise GraphQLError("You weren't following the user")
+    
+        follow.delete()
+
+        return UnFollowUser(success=True)
+        
+
 
 
 class SocialMediaMutation(graphene.ObjectType):
@@ -275,7 +333,9 @@ class SocialMediaMutation(graphene.ObjectType):
     update_post = UpdatePost.Field()
     delete_post = DeletePost.Field()
     create_interaction = CreateInteration.Field()
-    delete_interaction = DeleteInteraction.Field()    
+    delete_interaction = DeleteInteraction.Field() 
+    follow_user = FollowUser.Field()
+    unfollow_user = UnFollowUser.Field()   
 
 
 class SocialMediaQuery(graphene.ObjectType):
