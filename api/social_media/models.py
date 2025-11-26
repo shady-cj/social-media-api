@@ -16,13 +16,22 @@ class Profile(models.Model):
     preferences = models.JSONField(default=dict, null=True, blank=True)
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
 
+    class Meta:
+        indexes = [
+            models.Index(fields=["first_name"], name="idx_profile_first_name"),
+            models.Index(fields=["last_name"], name="idx_profile_last_name")
+        ]
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
     
     def get_mutual_followers(self):
-        return User.objects.filter(
-            followers__followed_by=self.user,
-            following__user=self.user,
+        # return User.objects.filter(
+        #     followers__followed_by=self.user,
+        #     following__user=self.user,
+        # )
+        return Profile.objects.filter(
+            user__followers__followed_by=self.user,
+            user__following__followed_by=self.user
         )
 
 
@@ -50,7 +59,7 @@ class PostMedia(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     mime_type = models.CharField(max_length=20, blank=True, null=True)
     constraints = [
-        models.CheckConstraint(check=Q(type__in=['PHOTO','VIDEO','GIF']), name='valid_interaction_type'),
+        models.CheckConstraint(check=Q(type__in=['PHOTO','VIDEO','GIF']), name='valid_media_type'),
     ]
 
 
