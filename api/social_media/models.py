@@ -44,7 +44,7 @@ class Post(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     is_published = models.BooleanField(default=False)
     edited = models.BooleanField(default=False)
-    deleted = models.BooleanField(default=False)
+    deleted = models.BooleanField(default=False) # soft delete flag
 
 
 class PostMedia(models.Model):

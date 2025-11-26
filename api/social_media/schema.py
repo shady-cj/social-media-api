@@ -109,6 +109,35 @@ class PostMediaInput(graphene.InputObjectType):
     mime_type = graphene.String()
 
 
+class UpdateProfile(graphene.Mutation):
+    profile = graphene.Field(ProfileNode)
+
+    class Arguments:
+        first_name = graphene.String(required=False)
+        last_name = graphene.String(required=False)
+        profile_photo = graphene.String(required=False)
+        bio = graphene.String(required=False)
+        preferences = graphene.JSONString(required=False)
+
+    def mutate(self, info, first_name=None, last_name=None, profile_photo=None, bio=None, preferences=None):
+        user = info.context.user
+        if user.is_anonymous or not user.is_authenticated:
+            raise GraphQLError("Authentication required to update profile.")
+        profile, created = Profile.objects.get_or_create(user=user) # get or create profile if not exists
+        
+        if first_name is not None:
+            profile.first_name = first_name
+        if last_name is not None:
+            profile.last_name = last_name
+        if profile_photo is not None:
+            profile.profile_photo = profile_photo
+        if bio is not None:
+            profile.bio = bio
+        if preferences is not None:
+            profile.preferences = preferences
+        
+        profile.save()
+        return UpdateProfile(profile=profile)
 
 class CreatePost(graphene.Mutation):
     post = graphene.Field(PostNode)
@@ -241,6 +270,7 @@ class DeleteInteraction(graphene.Mutation):
 
 
 class SocialMediaMutation(graphene.ObjectType):
+    update_profile = UpdateProfile.Field()
     create_post = CreatePost.Field()
     update_post = UpdatePost.Field()
     delete_post = DeletePost.Field()
