@@ -73,10 +73,11 @@ class PostMedia(models.Model):
     metadata = models.JSONField(default=dict, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     mime_type = models.CharField(max_length=20, blank=True, null=True)
-    constraints = [
-        models.CheckConstraint(check=Q(type__in=['PHOTO','VIDEO','GIF']), name='valid_media_type'),
-    ]
 
+    class Meta:
+        constraints = [
+            models.CheckConstraint(check=Q(type__in=['PHOTO','VIDEO','GIF']), name='valid_media_type'),
+        ]
 
 class Interaction(models.Model):
     interaction_type = (
@@ -104,6 +105,21 @@ class Interaction(models.Model):
             
 
         super().save(*args, **kwargs)
+
+
+class Bookmark(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="bookmarks")
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    bookmarked_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'post'], name='unique_bookmark'),
+        ]
+        indexes = [
+            models.Index(fields=['user', 'post'], name='idx_user_post_bookmark'),
+        ]
 
 
 class Follow(models.Model):

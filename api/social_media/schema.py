@@ -1,7 +1,7 @@
 from graphene_django import DjangoObjectType, DjangoListField
 import graphene
 from graphene_django.filter import DjangoFilterConnectionField
-from .models import Profile, Post, PostMedia, Interaction, Follow
+from .models import Profile, Post, PostMedia, Interaction, Follow, Bookmark
 from graphql import GraphQLError
 from django.utils import timezone
 from graphql_jwt.decorators import login_required
@@ -137,7 +137,7 @@ class FollowNode(DjangoObjectType):
         model = Follow 
         fields = ["id", "user", "followed_by"]
         filter_fields = {
-            'user__username': ['exact', 'icontains'],
+            'user__username': ['iexact', 'icontains'],
             'followed_by__username': ['exact', 'icontains']
         }
         interfaces = (
@@ -151,6 +151,19 @@ class FollowNode(DjangoObjectType):
     def resolve_followed_by(self, info):
         return self.followed_by.profile
     
+
+class BookmarkNode(DjangoObjectType):
+    class Meta:
+        model = Bookmark 
+        fields = "__all__"
+        filter_fields = {
+            "user__username": ['iexact', 'icontains'],
+            "post__id": ['exact']
+        }
+        interfaces = (
+            graphene.relay.Node
+        )
+
 
 class PostMediaInput(graphene.InputObjectType):
     """
@@ -453,6 +466,63 @@ class UnFollowUser(graphene.Mutation):
         follow.delete()
 
         return UnFollowUser(success=True)
+    
+class AddPostToBookmark(graphene.Mutation):
+
+    bookmark = graphene.Field(BookmarkNode)
+    success = graphene.Boolean()
+
+    class Arguments:
+        post_id = graphene.ID(required=True)
+
+    @login_required
+    def mutate(self, info, post_id):
+        user = info.context.user
+
+        if user.is_anonymous or not user.is_authenticated:
+            raise GraphQLError("Authentication required to bookmark a post.")
+        
+        _, post_id = Node.from_global_id(post_id)
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            raise GraphQLError("Post not found.")
+        
+        bookmark, created = Bookmark.objects.get_or_create(user=user, post=post)
+        if not created:
+            raise GraphQLError("Post already bookmarked.")
+        
+        return AddPostToBookmark(bookmark=bookmark, success=True)
+    
+
+class RemovePostFromBookmark(graphene.Mutation):
+
+    success = graphene.Boolean()
+
+    class Arguments:
+        post_id = graphene.ID(required=True)
+
+
+    @login_required
+    def mutate(self, info, post_id):
+        user = info.context.user
+
+        if user.is_anonymous or not user.is_authenticated:
+            raise GraphQLError("Authentication required to remove bookmark.")
+        
+        _, post_id = Node.from_global_id(post_id)
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            raise GraphQLError("Post not found.")
+        
+        try:
+            bookmark = Bookmark.objects.get(user=user, post=post)
+        except Bookmark.DoesNotExist:
+            raise GraphQLError("Bookmark not found.")
+        
+        bookmark.delete()
+        return RemovePostFromBookmark(success=True)
         
 
 
@@ -465,7 +535,9 @@ class SocialMediaMutation(graphene.ObjectType):
     create_interaction = CreateInteration.Field()
     delete_interaction = DeleteInteraction.Field() 
     follow_user = FollowUser.Field()
-    unfollow_user = UnFollowUser.Field()   
+    unfollow_user = UnFollowUser.Field() 
+    add_post_to_bookmark = AddPostToBookmark.Field()
+    remove_post_from_bookmark = RemovePostFromBookmark.Field()  
 
 
 class SocialMediaQuery(graphene.ObjectType):
@@ -485,6 +557,9 @@ class SocialMediaQuery(graphene.ObjectType):
 
     follow = graphene.relay.Node.Field(FollowNode)
     all_follows = DjangoFilterConnectionField(FollowNode)
+
+    bookmark = graphene.relay.Node.Field(BookmarkNode)
+    all_bookmarks = DjangoFilterConnectionField(BookmarkNode)
 
 
     @login_required
@@ -537,5 +612,20 @@ class SocialMediaQuery(graphene.ObjectType):
     @login_required
     def resolve_post_media(self, info, **kwargs):
         return PostMediaNode.get_node(info, id)
+    
+    @login_required
+    def resolve_bookmark(self, info, **kwargs):
+        user = info.context.user
+
+        bookmark =  BookmarkNode.get_node(info, id)
+        if user != bookmark.user:
+            raise GraphQLError("You don't have permission to view this bookmark")
+        return bookmark
+    
+
+    @login_required
+    def resolve_all_bookmarks(self, info, **kwargs):
+        user = info.context.user
+        return Bookmark.objects.select_related("user", "post").filter(user=user) # bookmarks are private
     
 
