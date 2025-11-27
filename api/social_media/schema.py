@@ -474,6 +474,8 @@ class SocialMediaQuery(graphene.ObjectType):
 
     post = graphene.relay.Node.Field(PostNode)
     all_posts = DjangoFilterConnectionField(PostNode)
+    all_posts_including_comments = DjangoFilterConnectionField(PostNode) # Returns all posts including post returned as comments... for filtering and paginating
+    all_deleted_posts = DjangoFilterConnectionField(PostNode) 
 
     post_media = graphene.relay.Node.Field(PostMediaNode)
     all_post_media = DjangoFilterConnectionField(PostMediaNode)
@@ -496,6 +498,16 @@ class SocialMediaQuery(graphene.ObjectType):
     @login_required
     def resolve_all_posts(self, info, **kwargs):
         return Post.objects.filter(deleted=False, parent_post=None)
+    
+
+    @login_required
+    def resolve_all_posts_including_comments(self, info, **kwargs):
+        return Post.objects.filter(deleted=False)
+    
+
+    @login_required
+    def resolve_all_deleted_posts(self, info, **kwargs):
+        return Post.objects.filter(deleted=True)
 
     @login_required
     def resolve_post(self, info, id):
