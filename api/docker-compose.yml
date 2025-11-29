@@ -6,3 +6,23 @@ services:
     env_file:
       - .env 
 
+  celery_worker:
+    build: .
+    command: celery -A social_media_project worker --loglevel=info
+    env_file:
+      - .env
+    depends_on:
+      - redis   # optional, but not harmful, reason for addition is migrations should be done before starting workers
+  
+  celery_beat:
+    build: .
+    command: celery -A social_media_project beat --loglevel=info
+    env_file:
+      - .env
+    depends_on:
+      - redis  # optional, but not harmful, reason for addition is migrations should be done before starting beat
+
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
