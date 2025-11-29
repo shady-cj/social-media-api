@@ -163,7 +163,7 @@ pip install -r requirements.txt
 
 4. **Configure environment variables**
 ```bash
-cp .env.example .env
+cp env.example .env
 # Edit .env with your database credentials
 ```
 
@@ -261,12 +261,40 @@ View the full API documentation in the GraphQL Playground at `/graphql`
 ```graphql
 query {
   allPosts {
-    id
-    content
-    author {
-      username
+    edges {
+      nodes {
+        id
+        content
+        author {
+          username
+        }
+        likes
+        }
+      }
+  }
+}
+```
+
+**Query all posts with pagination:**
+```graphql
+query {
+  allPosts(first: 5) {
+    pageInfo {
+      hasNextPage
+			hasPreviousPage
+			startCursor
+			endCursor
     }
-    likes
+    edges {
+      nodes {
+        id
+        content
+        author {
+          username
+        }
+        likes
+        }
+      }
   }
 }
 ```
