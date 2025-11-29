@@ -1,6 +1,5 @@
 secrets/
 .env
-.flowsheet_env/
 db.sqlite3
 __pycache__/
 venv
@@ -16,4 +15,4 @@ media
 staticfiles/
 build
 dist
-.flowsheet_env/
+.venv/
