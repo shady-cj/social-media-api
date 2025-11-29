@@ -13,3 +13,5 @@ django-cors-headers
 pillow
 python-decouple
 drf-spectacular[sidecar]
+whitenoise
+gunicorn
