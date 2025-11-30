@@ -87,6 +87,7 @@ GRAPHQL_JWT = {
 }
 GRAPHQL_AUTH = {
     'EMAIL_VERIFICATION': True, # Enforce that users verify their account before login.
+    # 'SEND_ACTIVATION_EMAIL': False,
     "REGISTER_MUTATION_FIELDS": ["username", "email"],
     "UPDATE_MUTATION_FIELDS": ["username"]
 }
@@ -100,8 +101,10 @@ if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
 
 else:
+    CORS_ALLOWED_ORIGINS = []
+    if config('CORS_ALLOWED_ORIGINS', default=None):
+        CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS').split(',')
 
-    CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='').split(',')
 
 
 # CORS_ALLOWED_ORIGINS = [
@@ -317,25 +320,6 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 
-
-# # Logging Configuration
-# LOGGING = {
-#     'version': 1,
-#     'disable_existing_loggers': False,
-#     'handlers': {
-#         'console': {
-#             'class': 'logging.StreamHandler',
-#         },
-#         'file': {
-#             'class': 'logging.FileHandler',
-#             'filename': BASE_DIR / 'logs' / 'django.log',
-#         },
-#     },
-#     'root': {
-#         'handlers': ['console', 'file'],
-#         'level': 'INFO',
-#     },
-# }
 
 LOGGING = {
     'version': 1,

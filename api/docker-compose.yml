@@ -5,6 +5,9 @@ services:
       - "${PORT:-8000}:8000"
     env_file:
       - .env 
+    depends_on:
+      db:
+        condition: service_healthy
 
   celery_worker:
     build: .
@@ -12,7 +15,10 @@ services:
     env_file:
       - .env
     depends_on:
-      - redis   # optional, but not harmful, reason for addition is migrations should be done before starting workers
+      redis:
+        condition: service_healthy 
+      web:
+        condition: service_started # optional, but not harmful, reason for addition is migrations should be done before starting
   
   celery_beat:
     build: .
@@ -20,9 +26,38 @@ services:
     env_file:
       - .env
     depends_on:
-      - redis  # optional, but not harmful, reason for addition is migrations should be done before starting beat
+      redis:
+        condition: service_healthy 
+      web:
+        condition: service_started # optional, but not harmful, reason for addition is migrations should be done before starting
 
   redis:
     image: "redis:alpine"
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: ${PGDATABASE}
+      POSTGRES_USER: ${PGUSER}
+      POSTGRES_PASSWORD: ${PGPASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    restart: always
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $PGUSER -d $PGDATABASE"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+volumes:
+  postgres_data:

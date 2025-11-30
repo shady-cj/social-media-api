@@ -580,7 +580,8 @@ class SocialMediaQuery(graphene.ObjectType):
 
     @login_required
     def resolve_all_deleted_posts(self, info, **kwargs):
-        return Post.objects.prefetch_related("post_bookmarks", "engagements", "comments", "attachments").select_related("author__profile").filter(deleted=True)
+        user = info.context.user
+        return Post.objects.prefetch_related("post_bookmarks", "engagements", "comments", "attachments").select_related("author__profile").filter(author=user, deleted=True)
 
     @login_required
     def resolve_post(self, info, id):
