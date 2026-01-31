@@ -20,27 +20,6 @@ A scalable GraphQL-based backend system for managing social media posts and user
 
 This project is a backend system designed to power a social media feed with capabilities for post management, user interactions (likes, comments, shares), and flexible data querying through GraphQL. The system is built with scalability in mind, optimized for high-traffic scenarios typical of modern social platforms.
 
-## 🎓 ProDev Program Context
-
-This project was developed as part of the **ProDev Backend Engineering program**, which focuses on building production-ready backend systems using modern technologies and best practices.
-
-### Program Learnings Applied
-
-**Key Technologies:**
-- Python & Django for robust backend development
-- REST APIs & GraphQL for flexible data access patterns
-- Docker for containerization and deployment consistency
-- CI/CD pipelines for automated testing and deployment
-- PostgreSQL for relational data management
-
-**Backend Development Concepts:**
-- **Database Design**: Normalized schema design for posts, users, and interactions with proper indexing strategies
-- **Asynchronous Programming**: Handling concurrent user interactions efficiently
-- **Caching Strategies**: Optimizing frequently accessed data (post feeds, user profiles)
-- **API Pagination**: paginate queries to improve api performance
-- **API Design Patterns**: GraphQL schema design for flexible client requirements
-- **Query Optimization**: N+1 query prevention and database performance tuning
-
 ## 🚀 Project Goals
 
 1. **Post Management**: Design intuitive APIs for creating, fetching, updating, and managing social media posts
